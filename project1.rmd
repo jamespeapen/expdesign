@@ -1,0 +1,91 @@
+---
+title: "Project 1"
+author: "James Eapen"
+date: "2021 Oct 4"
+output: 
+    html_document: 
+        theme: flatly
+        highlight: espresso
+---
+
+## Assignment tracker {.tabset}
+
+[source](https://github.com/jamespeapen/expdesign/blob/gh-pages/project1.rmd)
+
+### Setup
+
+```{r setup, message=FALSE}
+library("tidyverse")
+library("lubridate")
+library("ggplot2")
+library("DT")
+library("RColorBrewer")
+```
+
+### Data loading
+
+```{r data_loading, message=FALSE}
+sheets_url <- "https://docs.google.com/spreadsheets/d/1bJw_ad0PLQmLe4RvmRzsVnrOF-9Z9Xth9GTSdwO8B4M"
+googlesheets4::gs4_deauth()
+raw_data <- googlesheets4::read_sheet(sheets_url)
+
+# rename columns
+colnames(raw_data)  <- c("timestamp",
+                      "ID",
+                      "assignment",
+                      "start_time",
+                      "end_time",
+                      "comments")
+```
+
+### Data exploration {.tabset}
+
+#### Datatable
+
+```{r duration, message=FALSE}
+# get durations
+raw_data %>% mutate(duration = as.numeric(end_time - start_time)) -> assignments
+datatable(assignments)
+```
+
+#### Number of assignments done per person
+
+```{r exploration}
+assignments %>%
+    ggplot(aes(x = forcats::fct_infreq(ID))) +
+    geom_bar(stat = "count") +
+    xlab("ID") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+```
+
+#### Time taken per person
+
+```{r time_person, fig.width=10}
+# filter for durations > 0 since the duration calc got negatives
+nonz_durations <- assignments %>% subset(duration > 0)
+nonz_durations %>%
+    ggplot(aes(x = reorder(ID, duration), y = duration)) +
+    geom_boxplot() +
+    geom_jitter(aes(color = assignment)) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
+          legend.position = "bottom") +
+    coord_flip()
+```
+
+#### Time taken per assignment
+
+```{r time_assignment, fig.width=14, fig.height=14}
+nonz_durations %>%
+    ggplot(aes(x = reorder(assignment, duration), y = duration)) +
+    geom_boxplot() +
+    geom_jitter(aes(color = ID)) +
+    theme(axis.text.x = element_text(angle = 90),
+          legend.position = "bottom") +
+    coord_flip()
+```
+
+### Session Info
+
+```{r}
+sessionInfo()
+```
+
