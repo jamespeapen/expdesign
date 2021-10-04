@@ -4,7 +4,7 @@ author: "James Eapen"
 date: "2021 Oct 4"
 output: 
     html_document: 
-        theme: flatly
+        theme: sandstone
         highlight: espresso
 ---
 
@@ -18,7 +18,6 @@ output:
 library("tidyverse")
 library("lubridate")
 library("ggplot2")
-library("DT")
 library("RColorBrewer")
 ```
 
@@ -38,6 +37,34 @@ colnames(raw_data)  <- c("timestamp",
                       "comments")
 ```
 
+### Cleanup {.tabset}
+
+#### IDs
+
+Find out how many IDs there are with counts.
+
+```{r}
+table(raw_data$ID) %>% knitr::kable()
+```
+
+FooBarBazQux is Tim so I'll remove that row of data.
+
+```{r}
+raw_data %>% filter(ID != "FooBarBazQux") -> raw_data
+```
+
+T-rex has two IDs so replace "T-Rex" with "T-rex" to be consistent.
+
+```{r}
+# piped object can be accessed with .
+raw_data$ID %>% replace(. == "T-Rex", "T-rex") -> raw_data$ID
+table(raw_data$ID) %>% knitr::kable()
+```
+
+
+#### Assignments
+
+
 ### Data exploration {.tabset}
 
 #### Datatable
@@ -45,14 +72,14 @@ colnames(raw_data)  <- c("timestamp",
 ```{r duration, message=FALSE}
 # get durations
 raw_data %>% mutate(duration = as.numeric(end_time - start_time)) -> assignments
-datatable(assignments)
+DT::datatable(assignments)
 ```
 
 #### Number of assignments done per person
 
 ```{r exploration}
 assignments %>%
-    ggplot(aes(x = forcats::fct_infreq(ID))) +
+    ggplot(aes(x = forcats::fct_infreq(ID))) + # forcats::fct_infreq sorts the IDs by count
     geom_bar(stat = "count") +
     xlab("ID") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 ```
@@ -79,7 +106,8 @@ nonz_durations %>%
     geom_boxplot() +
     geom_jitter(aes(color = ID)) +
     theme(axis.text.x = element_text(angle = 90),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          axis.text.y = element_text(size = 12)) +
     coord_flip()
 ```
 
