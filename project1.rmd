@@ -64,6 +64,48 @@ table(raw_data$ID) %>% knitr::kable()
 
 #### Assignments
 
+```{r}
+raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
+```
+
+`assignment` has `r length(unique(raw_data$assignment))` unique elements and is
+much messier so I'll start with the assignments with somewhat consistent
+words in their names. Since these some assignments have 'Git' and 'Project
+Management' occurring consistently, I'll use regular expressions to find all
+the rows with 'Git' or 'Project Management' and replace them with "Using Git
+from RStudio" and "Project Management with RStudio".
+
+`.*` in regex means match anything, so it'll match any string as long as it has
+'git' or 'project management'. This will be case-insensitive matching.
+
+
+```{r}
+#'?' matches whether there is a space before git or not
+raw_data$assignment %>%
+    sub(".* ?git .*", "Using Git from RStudio", ., ignore.case = TRUE) ->
+        raw_data$assignment
+
+raw_data$assignment %>%
+    sub(".*project management.*", "Project Management with RStudio", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
+```
+
+There are now `r length(unique(raw_data$assignment))` unique assignment names.
+
+And again by matching for any occurrences of '23', '24', and '29' in the same
+string.
+
+```{r}
+raw_data$assignment %>%
+    sub(".*23.*24.*29.*", "Ch. 23, 24, 29", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
+```
+
+There are now `r length(unique(raw_data$assignment))` unique assignment names.
 
 ### Data exploration {.tabset}
 
