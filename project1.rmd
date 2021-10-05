@@ -165,8 +165,7 @@ nonz_durations %>%
     geom_boxplot() +
     geom_jitter(aes(color = assignment)) +
     xlab("ID") +
-    theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
-          legend.position = "bottom",
+    theme(legend.position = "bottom",
           axis.text.y = element_text(size = 12)) +
     coord_flip()
 ```
@@ -179,8 +178,7 @@ nonz_durations %>%
     geom_boxplot() +
     geom_jitter(aes(color = ID)) +
     xlab("assignment") +
-    theme(axis.text.x = element_text(angle = 90),
-          legend.position = "bottom",
+    theme(legend.position = "bottom",
           axis.text.y = element_text(size = 12)) +
     coord_flip()
 ```
