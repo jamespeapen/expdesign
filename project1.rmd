@@ -151,7 +151,8 @@ DT::datatable(assignments)
 assignments %>%
     ggplot(aes(x = forcats::fct_infreq(ID))) + # forcats::fct_infreq sorts the IDs by count
     geom_bar(stat = "count") +
-    xlab("ID") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+    xlab("ID") +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 ```
 
 #### Time taken per person
@@ -163,9 +164,10 @@ nonz_durations %>%
     ggplot(aes(x = reorder(ID, duration), y = duration)) +
     geom_boxplot() +
     geom_jitter(aes(color = assignment)) +
+    xlab("ID") +
     theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
           legend.position = "bottom",
-          axis.text.y = element_text(size=12)) +
+          axis.text.y = element_text(size = 12)) +
     coord_flip()
 ```
 
@@ -176,6 +178,7 @@ nonz_durations %>%
     ggplot(aes(x = reorder(assignment, duration), y = duration)) +
     geom_boxplot() +
     geom_jitter(aes(color = ID)) +
+    xlab("assignment") +
     theme(axis.text.x = element_text(angle = 90),
           legend.position = "bottom",
           axis.text.y = element_text(size = 12)) +
