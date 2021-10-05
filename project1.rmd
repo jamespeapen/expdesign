@@ -170,6 +170,17 @@ nonz_durations %>%
     coord_flip()
 ```
 
+The assignment names are quite long so I'll shorten the ISLRv2 full name to the
+abbreviation.
+
+```{r}
+nonz_durations$assignment %>%
+    sub("Intro .* edition", "ISLRv2", .,
+        ignore.case = TRUE) -> nonz_durations$assignment
+nonz_durations$assignment %>% table() %>% knitr::kable()
+```
+
+
 #### Time taken per assignment
 
 ```{r time_assignment, fig.width=14, fig.height=10}
@@ -181,6 +192,37 @@ nonz_durations %>%
     theme(legend.position = "bottom",
           axis.text.y = element_text(size = 12)) +
     coord_flip()
+```
+
+To see how the type of assignment affects duration, I'll add `assignment_type`
+and `assignment_source` columns.
+
+```{r}
+nonz_durations %>%
+    mutate(assignment_type =
+           case_when(
+                     startsWith(assignment, "Reading") ~ "Reading",
+                     startsWith(assignment, "Lab") ~ "Lab",
+                     grepl("Project Management|Git", assignment) ~ "Reading")) %>%
+    mutate(assignment_source =
+           case_when(
+                     grepl("ISLRv2", assignment) ~ "ISLRv2",
+                     grepl("Experimental Design for Biologists", assignment) ~ "EDB",
+                     grepl("RStudio", ignore.case = TRUE, assignment) ~ "Software Carpentry")) -> nonz_durations
+
+
+nonz_durations %>% head() %>% knitr::kable()
+```
+
+```{r, fig.width=10, fig.height=10}
+nonz_durations %>%
+    ggplot(aes(x = reorder(assignment_type, duration), y = duration)) +
+    geom_boxplot() +
+    geom_jitter(aes(color = ID)) +
+    xlab("Assignment Type") +
+    facet_grid(cols = vars(assignment_source)) +
+    theme(legend.position = "bottom",
+          axis.text.y = element_text(size = 12))
 ```
 
 ### Session Info
