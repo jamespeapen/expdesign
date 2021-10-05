@@ -70,7 +70,7 @@ raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
 
 `assignment` has `r length(unique(raw_data$assignment))` unique elements and is
 much messier so I'll start with the assignments with somewhat consistent
-words in their names. Since these some assignments have 'Git' and 'Project
+words in their names. Since some assignments have 'Git' and 'Project
 Management' occurring consistently, I'll use regular expressions to find all
 the rows with 'Git' or 'Project Management' and replace them with "Using Git
 from RStudio" and "Project Management with RStudio".
@@ -95,17 +95,45 @@ raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
 There are now `r length(unique(raw_data$assignment))` unique assignment names.
 
 And again by matching for any occurrences of '23', '24', and '29' in the same
-string.
+string. I'll be adding the 'Reading' and 'Lab' prefixes to better organize the
+data.
 
 ```{r}
 raw_data$assignment %>%
-    sub(".*23.*24.*29.*", "Ch. 23, 24, 29", .,
+    sub(".*23.*24.*29.*", "Reading: Experimental Design for Biologists Ch. 23, 24, 29", .,
         ignore.case = TRUE) -> raw_data$assignment
 
 raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
 ```
 
 There are now `r length(unique(raw_data$assignment))` unique assignment names.
+
+Getting Ch. 2 and 3 labs and chapter 6 reading is a little more complex. Chaper 3
+matches needs two patterns separated by `|` to match both:
+
+```{r}
+raw_data$assignment %>%
+    sub(".*Ch(apter)? ?2.*(assignment|lab).*", "Lab: ISLRv2 Chapter 2", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
+
+raw_data$assignment %>%
+    sub(".*Ch.*3.*lab.*|.*3.6.*", "Lab: ISLRv2 Chapter 3", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
+
+raw_data$assignment %>%
+    sub(".*Ch(apter)?.? ?6.*", "Reading: ISLRv2 Chapter 6", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+raw_data$assignment %>% table() %>% sort() %>% knitr::kable()
+```
+
+Now with those collected there are `r length(unique(raw_data$assignment))`
+assignments.
+
 
 ### Data exploration {.tabset}
 
@@ -128,7 +156,7 @@ assignments %>%
 
 #### Time taken per person
 
-```{r time_person, fig.width=10}
+```{r time_person, fig.width=15, fig.height=10}
 # filter for durations > 0 since the duration calc got negatives
 nonz_durations <- assignments %>% subset(duration > 0)
 nonz_durations %>%
@@ -136,13 +164,14 @@ nonz_durations %>%
     geom_boxplot() +
     geom_jitter(aes(color = assignment)) +
     theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
-          legend.position = "bottom") +
+          legend.position = "bottom",
+          axis.text.y = element_text(size=12)) +
     coord_flip()
 ```
 
 #### Time taken per assignment
 
-```{r time_assignment, fig.width=14, fig.height=14}
+```{r time_assignment, fig.width=14, fig.height=10}
 nonz_durations %>%
     ggplot(aes(x = reorder(assignment, duration), y = duration)) +
     geom_boxplot() +
