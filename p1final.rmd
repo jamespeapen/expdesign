@@ -45,8 +45,8 @@ time for the class and make sure that any improvements in learning from a web
 based and electronic statistical learning framework are taken advantage of.
 
 
- Based on the experience doing the homework, I hypothesize that the duration
- will show greatest variation between assignment sources.
+Based on the experience doing the homework, I hypothesize that the assignment
+source and assignment type will be the best predictors of duration.
 
 ## Methods
 
