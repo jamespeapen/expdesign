@@ -6,6 +6,7 @@ output:
     html_document: 
         theme: sandstone
         highlight: espresso
+bibliography: tandf_ujse2025_12.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -35,15 +36,17 @@ take around six hours a week. Assignments are either readings or labs and come
 from three soures: Software Carpentry for R, Experimental Design for
 Biologists, and An Introduction to Statistical Learning. Since the class is
 new, the time that assignments in the class takes has not previously been been
-studied. Understanding the factors that influence the time taken to do homework
-will allow future assignments to be planned more effectivey to take no more
-than the allotted time for the class.
+studied. A study found that web based homewok resulted in better test scores
+compared to pen-and-paper homework (@ex2017). In this class we use R instead of
+pen-and-paper calculations and it may be a good approach. Understanding the
+factors that influence the time taken to do homework will allow future
+assignments to be planned more effectively to take no more than the allotted
+time for the class and make sure that any improvements in learning from a web
+based and electronic statistical learning framework are taken advantage of.
 
-A literature search showed that there was no relevant work done in this
-particular area.
 
-Based on the experience doing the homework, I hypothesize that the duration
-will show greatest variation between assignment sources.
+ Based on the experience doing the homework, I hypothesize that the duration
+ will show greatest variation between assignment sources.
 
 ## Methods
 
@@ -436,6 +439,10 @@ the model and its applicability. Accounting for differences in the way they were
 entered, there should be between 10 and 12 assignments for each student, but
 some students had only 5 records. Future studies should have a way of
 confirming that every student records data from each assignment.
+
+## References
+
+<div id="refs"></div>
 
 ### Session Info
 

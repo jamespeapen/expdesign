@@ -45,6 +45,28 @@
 
 
 
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
 
 
 
@@ -162,8 +184,7 @@ pre code {
 <p><a href="https://github.com/jamespeapen/expdesign/blob/gh-pages/p1final.rmd">source</a></p>
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Assignments for Experimental Design and Biostatistics class are supposed to take around six hours a week. Assignments are either readings or labs and come from three soures: Software Carpentry for R, Experimental Design for Biologists, and An Introduction to Statistical Learning. Since the class is new, the time that assignments in the class takes has not previously been been studied. Understanding the factors that influence the time taken to do homework will allow future assignments to be planned more effectivey to take no more than the allotted time for the class.</p>
-<p>A literature search showed that there was no relevant work done in this particular area.</p>
+<p>Assignments for Experimental Design and Biostatistics class are supposed to take around six hours a week. Assignments are either readings or labs and come from three soures: Software Carpentry for R, Experimental Design for Biologists, and An Introduction to Statistical Learning. Since the class is new, the time that assignments in the class takes has not previously been been studied. A study found that web based homewok resulted in better test scores compared to pen-and-paper homework (<span class="citation">Jonsdottir, Bjornsdottir, and Stefansson (2017)</span>). In this class we use R instead of pen-and-paper calculations and it may be a good approach. Understanding the factors that influence the time taken to do homework will allow future assignments to be planned more effectively to take no more than the allotted time for the class and make sure that any improvements in learning from a web based and electronic statistical learning framework are taken advantage of.</p>
 <p>Based on the experience doing the homework, I hypothesize that the duration will show greatest variation between assignment sources.</p>
 </div>
 <div id="methods" class="section level2">
@@ -527,6 +548,14 @@ Residual independence and variance
 <p>By taking the student IDs and the assignments as random effects, I hoped to account for variations in student experience with statistics and R as well as differences in the way that students went about doint the assignments. However the large confidence intervals for the coefficients make me question the relevance and applicability of this model.</p>
 <p>Data exploration also showed that, to a degree, students who take a long time seem more likely to be students who make comments on the assignment.</p>
 <p>One of the weaknesses of this model is the lack of complete data. Not all the assignments done were recoreded and this has likely reduced the power of the model and its applicability. Accounting for differences in the way they were entered, there should be between 10 and 12 assignments for each student, but some students had only 5 records. Future studies should have a way of confirming that every student records data from each assignment.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-ex2017" class="csl-entry">
+Jonsdottir, Anna Helga, Audbjorg Bjornsdottir, and Gunnar Stefansson. 2017. <span>“Difference in Learning Among Students Doing Pen-and-Paper Homework Compared to Web-Based Homework in an Introductory Statistics Course.”</span> <em>Journal of Statistics Education</em> 25 (1): 12–20. <a href="https://doi.org/10.1080/10691898.2017.1291289">https://doi.org/10.1080/10691898.2017.1291289</a>.
+</div>
+</div>
 <div id="session-info" class="section level3">
 <h3>Session Info</h3>
 <pre><code>## R version 4.1.1 (2021-08-10)
