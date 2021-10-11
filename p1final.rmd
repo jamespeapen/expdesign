@@ -26,7 +26,7 @@ library("emmeans")
 library("patchwork")
 ```
 
-[source](https://github.com/jamespeapen/expdesign/blob/gh_pages/p1final.rmd)
+[source](https://github.com/jamespeapen/expdesign/blob/gh-pages/p1final.rmd)
 
 ## Introduction
 
