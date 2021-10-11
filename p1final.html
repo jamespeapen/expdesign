@@ -164,7 +164,7 @@ pre code {
 <h2>Introduction</h2>
 <p>Assignments for Experimental Design and Biostatistics class are supposed to take around six hours a week. Assignments are either readings or labs and come from three soures: Software Carpentry for R, Experimental Design for Biologists, and An Introduction to Statistical Learning. Since the class is new, the time that assignments in the class takes has not previously been been studied. Understanding the factors that influence the time taken to do homework will allow future assignments to be planned more effectivey to take no more than the allotted time for the class.</p>
 <p>A literature search showed that there was no relevant work done in this particular area.</p>
-<p>Based on the experience doing the homework, I hypothesize that the source of the assignment and the type of assignment are best predictors of the duration.</p>
+<p>Based on the experience doing the homework, I hypothesize that the duration will show greatest variation between assignment sources.</p>
 </div>
 <div id="methods" class="section level2">
 <h2>Methods</h2>
@@ -523,7 +523,8 @@ Residual independence and variance
 </div>
 <div id="conclusions" class="section level2">
 <h2>Conclusions</h2>
-<p>The mixed model show that the source of the assignment plays an important role in determining how long students take to complete the assignment, partially confirming my hypothesis. By taking the student IDs and the assignments as random effects, I hoped to account for variations in student experience with statistics and R as well as differences in the way that students went about doint the assignments. However the large confidence intervals for the coefficients make me question the relevance and applicability of this model.</p>
+<p>The mixed model show that the source of the assignment plays an important role in determining how long students take to complete the assignment, partially confirming my hypothesis. I suspect that there were no significant differences between the ISLRv2 and EDB sources because ISLRv2 based assignments were given one chapter at a time while we had 3 EDB assignments for a week. Breaking it down by chapter may better elucidate the differences between sources.</p>
+<p>By taking the student IDs and the assignments as random effects, I hoped to account for variations in student experience with statistics and R as well as differences in the way that students went about doint the assignments. However the large confidence intervals for the coefficients make me question the relevance and applicability of this model.</p>
 <p>Data exploration also showed that, to a degree, students who take a long time seem more likely to be students who make comments on the assignment.</p>
 <p>One of the weaknesses of this model is the lack of complete data. Not all the assignments done were recoreded and this has likely reduced the power of the model and its applicability. Accounting for differences in the way they were entered, there should be between 10 and 12 assignments for each student, but some students had only 5 records. Future studies should have a way of confirming that every student records data from each assignment.</p>
 <div id="session-info" class="section level3">
