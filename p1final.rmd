@@ -39,10 +39,11 @@ studied. Understanding the factors that influence the time taken to do homework
 will allow future assignments to be planned more effectivey to take no more
 than the allotted time for the class.
 
-There has been no prior work done in this area.
+A literature search showed that there was no relevant work done in this
+particular area.
 
-I hypothesize that the source of the assignment increases the duration of the
-assignment.
+Based on the experience doing the homework, I hypothesize that the source of
+the assignment and the type of assignment are best predictors of the duration.
 
 ## Methods
 
@@ -234,8 +235,9 @@ nonz_durations %>%
 
 ```{r}
 as_ttest <- nonz_durations %>%
-wilcox_test(duration ~ assignment_source) %>%
-add_significance() %>% add_xy_position(x = "assignment_source")
+    wilcox_test(duration ~ assignment_source) %>%
+    add_significance() %>%
+    add_xy_position(x = "assignment_source")
 ```
 
 ```{r}
@@ -246,7 +248,7 @@ nonz_durations %>%
     geom_boxplot(fill = "white", width = 0.1) +
     xlab("Assignment source") + ylab("duration (mins)") +
     theme(legend.position = "none") +
-    stat_pvalue_manual(as_ttest, label = 'p', inherit.aes = FALSE) +
+    stat_pvalue_manual(as_ttest, label = "p", inherit.aes = FALSE) +
     labs(subtitle = get_pwc_label(as_ttest), tag = "B") -> time_per_asource
 ```
 
@@ -254,7 +256,8 @@ nonz_durations %>%
 astype_ttest <- nonz_durations %>%
     group_by(assignment_type) %>%
     wilcox_test(duration ~ assignment_source) %>%
-    add_significance() %>% add_xy_position(x = "assignment_source")
+    add_significance() %>%
+    add_xy_position(x = "assignment_source")
 ```
 
 
@@ -410,19 +413,24 @@ and the Software Carpentry sources are significant (p $\le$ 0.05).
 
 ## Conclusions
 
-The data and the mixed model show that the source of the assignment plays an
+The mixed model show that the source of the assignment plays an
 important role in determining how long students take to complete the
-assignment. However the large confidence intervals for the coefficients make me
-question the relevance of this model.
+assignment, partially confirming my hypothesis. By taking the student IDs and
+the assignments as random effects, I hoped to account for variations in student
+experience with statistics and R as well as differences in the way that
+students went about doint the assignments. However the large confidence
+intervals for the coefficients make me question the relevance and applicability
+of this model.
 
-It also shows, to a degree, that students who take a long time are also
-likely to be students who make comments on the assignment.
+Data exploration also showed that, to a degree, students who take a long time
+seem more likely to be students who make comments on the assignment.
 
 One of the weaknesses of this model is the lack of complete data. Not all
 the assignments done were recoreded and this has likely reduced the power of
 the model and its applicability. Accounting for differences in the way they were
 entered, there should be between 10 and 12 assignments for each student, but
-some students had only 5 records.
+some students had only 5 records. Future studies should have a way of
+confirming that every student records data from each assignment.
 
 ### Session Info
 
