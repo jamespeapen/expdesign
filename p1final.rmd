@@ -1,0 +1,432 @@
+---
+title: "Project 1"
+author: "James Eapen"
+date: "2021 Oct 11"
+output: 
+    html_document: 
+        theme: sandstone
+        highlight: espresso
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+```{r libs}
+library("tidyverse")
+library("ggfortify")
+library("lubridate")
+library("ggplot2"); theme_set(theme_classic())
+library("ggpubr")
+library("RColorBrewer")
+library("plotly")
+library("lme4")
+library("MuMIn")
+library("rstatix")
+library("emmeans")
+library("patchwork")
+```
+
+[source](https://github.com/jamespeapen/expdesign/blob/gh_pages/p1final.rmd)
+
+## Introduction
+
+Assignments for Experimental Design and Biostatistics class are supposed to
+take around six hours a week. Assignments are either readings or labs and come
+from three soures: Software Carpentry for R, Experimental Design for
+Biologists, and An Introduction to Statistical Learning. Since the class is
+new, the time that assignments in the class takes has not previously been been
+studied. Understanding the factors that influence the time taken to do homework
+will allow future assignments to be planned more effectivey to take no more
+than the allotted time for the class.
+
+There has been no prior work done in this area.
+
+I hypothesize that the source of the assignment increases the duration of the
+assignment.
+
+## Methods
+
+### Design
+
+During the course, students have been recording their start and end times for 
+each assignment through a survey. The independent variables collected were: 
+
+ - a random student ID
+
+ - assignment name
+
+ - comments about the assignment
+
+The dependent variable was the duration, calculated as the difference between
+the start and end times. After collecting the dataset, I further grouped the
+data by the the type of assignment (reading or lab) and the source of the
+assignment. Since some students made comments while others did not, I also made
+a binary variable coding whether or not there was a comment for each entry.
+
+
+## Results {.tabset}
+
+```{r cleanup}
+sheets_url <- "https://docs.google.com/spreadsheets/d/1bJw_ad0PLQmLe4RvmRzsVnrOF-9Z9Xth9GTSdwO8B4M"
+googlesheets4::gs4_deauth()
+raw_data <- googlesheets4::read_sheet(sheets_url)
+
+# rename columns
+colnames(raw_data)  <- c("timestamp",
+                      "ID",
+                      "assignment",
+                      "start_time",
+                      "end_time",
+                      "comments")
+
+#### IDs
+
+#FooBarBazQux is Tim so I'll remove that row of data.
+
+raw_data %>% filter(ID != "FooBarBazQux") -> raw_data
+
+# T-rex has two IDs so replace "T-Rex" with "T-rex" to be consistent.
+
+# piped object can be accessed with .
+raw_data$ID %>% replace(. == "T-Rex", "T-rex") -> raw_data$ID
+
+##### Assignments
+
+#`assignment` has `r length(unique(raw_data$assignment))` unique elements and is
+#much messier so I'll start with the assignments with somewhat consistent
+#words in their names. Since some assignments have 'Git' and 'Project
+#Management' occurring consistently, I'll use regular expressions to find all
+#the rows with 'Git' or 'Project Management' and replace them with "Using Git
+#from RStudio" and "Project Management with RStudio".
+
+#`.*` in regex means match anything, so it'll match any string as long as it has
+#'git' or 'project management'. This will be case-insensitive matching.
+
+
+#'?' matches whether there is a space before git or not
+raw_data$assignment %>%
+    sub(".* ?git .*", "Using Git from RStudio", ., ignore.case = TRUE) ->
+        raw_data$assignment
+
+raw_data$assignment %>%
+    sub(".*project management.*", "Project Management with RStudio", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+# There are now `r length(unique(raw_data$assignment))` unique assignment names.
+
+# And again by matching for any occurrences of '23', '24', and '29' in the same
+# string. I'll be adding the 'Reading' and 'Lab' prefixes to better organize the
+# data.
+
+raw_data$assignment %>%
+    sub(".*23.*24.*29.*", "Reading: EDB Ch. 23, 24, 29", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+raw_data$assignment %>%
+    sub("Experimental.*Biologists", "EDB", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+# There are now `r length(unique(raw_data$assignment))` unique assignment names.
+
+# Getting Ch. 2 and 3 labs and chapter 6 reading is a little more complex. Chaper 3
+# matches needs two patterns separated by `|` to match both:
+
+raw_data$assignment %>%
+    sub(".*Ch(apter)? ?2.*(assignment|lab).*", "Lab: ISLRv2 Chapter 2", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+
+raw_data$assignment %>%
+    sub(".*Ch.*3.*lab.*|.*3.6.*", "Lab: ISLRv2 Chapter 3", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+
+raw_data$assignment %>%
+    sub(".*Ch(apter)?.? ?6.*", "Reading: ISLRv2 Chapter 6", .,
+        ignore.case = TRUE) -> raw_data$assignment
+
+# Now with those collected there are `r length(unique(raw_data$assignment))`
+# assignments.
+
+# get durations
+raw_data %>% mutate(duration = as.numeric(end_time - start_time)) -> assignments
+```
+
+### Number of assignments done per person
+
+```{r exploration, fig.cap = "Number of assignments recorded for each student"}
+assignments %>%
+    ggplot(aes(x = forcats::fct_infreq(ID))) + # forcats::fct_infreq sorts the IDs by count
+    geom_bar(stat = "count") +
+    xlab("ID") + ylab("duration (mins)") +
+    theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+```
+
+The data show that there are differences between the number of assignments
+reported in the survey by each student. 
+
+### Time taken per person
+
+```{r time_person, fig.cap = "Spread of times taken by each student to complete recorded assignments"}
+# filter for durations > 0 since the duration calc got negatives
+nonz_durations <- assignments %>% subset(duration > 0)
+nonz_durations %>%
+    ggplot(aes(x = reorder(ID, duration), y = duration)) +
+    geom_boxplot() +
+    xlab("ID") + ylab("duration (mins)") +
+    theme(axis.text.y = element_text(size = 12)) +
+    coord_flip() +
+    labs(tag = "A") -> time_per_student
+```
+
+```{r, fig.width = 10}
+nonz_durations %>%
+    group_by(ID) %>%
+    summarise(sum(duration)) %>%
+    as.data.frame() %>%
+    rename("duration" = "sum(duration)") %>%
+    ggplot(aes(x = reorder(ID, duration), y = duration)) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(vjust = 0.5)) +
+    xlab("ID") + ylab("duration (mins)") + coord_flip() +
+    labs(tag = "B") -> total_time_per_student
+
+time_per_student + total_time_per_student
+```
+
+Time taken to complete assignments for each student. **A** shows that for there
+is considerable variation in the spread of duration for each person. The total
+time taken for all assignments for each student shown by **B** also reveals
+large variations between the students.
+
+```{r}
+nonz_durations$assignment %>%
+    sub("Intro .* edition", "ISLRv2", .,
+        ignore.case = TRUE) -> nonz_durations$assignment
+```
+
+
+### Time taken per assignment
+
+```{r}
+nonz_durations %>%
+    mutate(assignment_type =
+           case_when(
+                     startsWith(assignment, "Reading") ~ "Reading",
+                     startsWith(assignment, "Lab") ~ "Lab",
+                     grepl("Project Management|Git", assignment) ~ "Reading"),
+    assignment_source =
+        case_when(
+                  grepl("ISLRv2", assignment) ~ "ISLRv2",
+                  grepl("EDB", assignment) ~ "EDB",
+                  grepl("RStudio", ignore.case = TRUE, assignment) ~ "Software Carpentry")) -> nonz_durations
+```
+
+```{r time_assignment}
+nonz_durations %>%
+    ggplot(aes(x = reorder(assignment, duration), y = duration)) +
+    geom_boxplot() +
+    xlab("assignment") + ylab("duration (mins)") +
+    theme(axis.text.y = element_text(size = 12)) +
+    coord_flip() +
+    labs(tag = "A") -> time_per_assignment
+```
+
+```{r}
+as_ttest <- nonz_durations %>%
+wilcox_test(duration ~ assignment_source) %>%
+add_significance() %>% add_xy_position(x = "assignment_source")
+```
+
+```{r}
+nonz_durations %>%
+    ggplot(aes(x = assignment_source, y = duration,
+               fill = assignment_source)) +
+    geom_violin() +
+    geom_boxplot(fill = "white", width = 0.1) +
+    xlab("Assignment source") + ylab("duration (mins)") +
+    theme(legend.position = "none") +
+    stat_pvalue_manual(as_ttest, label = 'p', inherit.aes = FALSE) +
+    labs(subtitle = get_pwc_label(as_ttest), tag = "B") -> time_per_asource
+```
+
+```{r}
+astype_ttest <- nonz_durations %>%
+    group_by(assignment_type) %>%
+    wilcox_test(duration ~ assignment_source) %>%
+    add_significance() %>% add_xy_position(x = "assignment_source")
+```
+
+
+```{r}
+nonz_durations %>%
+    ggplot(aes(x = assignment_source, duration, y = duration)) +
+    geom_violin(aes(fill = assignment_source)) +
+    geom_boxplot(fill = "white", width = 0.1) +
+    xlab("Assignment source") + ylab("duration (mins)") +
+    facet_grid(cols = vars(assignment_type)) +
+    theme(legend.position = "none",
+          axis.text.y = element_text(size = 12),
+          axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+    stat_pvalue_manual(astype_ttest, label = "p") +
+    labs(tag = "C") -> time_per_asource_type
+```
+
+```{r, fig.height = 9, fig.width = 14}
+time_per_assignment + time_per_asource / time_per_asource_type
+```
+
+This panel shows the time taken for each assignment based on assignment name,
+source and type. **A** shows that like the IDs, there is quite a lot of variation
+in time taken for each specific assignment and some assignments have larger
+duration ranges than others. **B** shows the duration by the source of the
+assignment while **C** shows the duration by both source and type of assignment.
+ISLRv2 assignments have a wider range and take longer than the assignments from
+EDB and Software Carpentry.  p-values are from pairwise Wilcoxon tests, but the
+tests have not accounted for random effects.
+
+
+### Time by comment
+
+```{r}
+nonz_durations %>%
+    mutate(comment_length =
+           ifelse(is.na(str_length(comments)), 0, str_length(comments)),
+       comment_present = as.factor(ifelse(is.na(str_length(comments)), 0, 1))) -> nonz_durations
+```
+
+```{r}
+comment_ttest <- nonz_durations %>%
+wilcox_test(duration ~ comment_present) %>%
+add_significance() %>% add_xy_position(x = "comment_present")
+```
+
+```{r}
+nonz_durations %>%
+    ggplot(aes(x = comment_present, y = duration, fill = comment_present)) +
+    geom_violin() +
+    geom_boxplot(fill = "white", width = 0.1) +
+    stat_pvalue_manual(comment_ttest, inherit.aes = FALSE, label = "p") +
+    theme(legend.position = "none") +
+    labs(subtitle = get_test_label(comment_ttest, detailed = TRUE)) +
+    xlab("comment present") + ylab("duration (mins)")
+```
+
+Among the students who made comments, there were a greater number who took
+longer than 200 minutes to complete the assignment than among the students who
+did not record any comments. The p-value is from a Wilcoxon test without
+accounting for random effects.
+
+## Analysis {.tabset}
+
+### Examine dependent variable
+
+```{r duration_dist, fig.show = "hold", out.width = "50%"}
+hist(nonz_durations$duration)
+qqnorm(nonz_durations$duration)
+qqline(nonz_durations$duration)
+```
+
+The durations are not normally distributed, but have a strong right skew so I
+log-normalized the data.
+
+```{r log_dist, fig.show = "hold", out.width = "50%"}
+hist(log(nonz_durations$duration))
+qqnorm(log(nonz_durations$duration))
+qqline(log(nonz_durations$duration))
+```
+
+Log-normalization has reduced the skew.
+
+### Mixed effects model
+
+Since there is a lot of variation in the durations betweenn students and
+between assignments, I fit a mixed effects model using the student ID and
+assignment as random effects and comment presence, assignment source and
+assignment type as predictors. The assignment source and types were modelled as
+interaction terms since the type of assignment depended on where it came from.
+
+Then I ran `dredge` on the model to get the known effect predictor that had the
+greatest effect on the duration.
+
+```{r}
+me_model <- lmer(log(duration) ~
+                 assignment_source * assignment_type + comment_present +
+                 (1 | assignment) +
+                 (1 | ID),
+             data = nonz_durations, na.action = 'na.fail')
+options(knitr.kable.NA = '')
+knitr::kable(dredge(me_model, rank = "BIC"))
+```
+
+The model with only `assignment_source` as a predictor seems to be the best one.
+
+I then ran two mixed models with assignment source as the known effect. Between
+a mixed model with only ID as a random effect (`re_id`) and a mixed model with both ID
+and assignment as random effects (`re_id_assignment`), the latter has a lower
+BIC.
+
+```{r fmodel}
+re_id <- lmer(log(duration) ~
+                             assignment_source + (1 | ID), data = nonz_durations,
+                         na.action = 'na.fail')
+
+re_id_assignment <- lmer(log(duration) ~ assignment_source + (1 | assignment) +
+    (1 | ID), data = nonz_durations, na.action = 'na.fail')
+knitr::kable(anova(re_id_assignment, re_id))
+```
+
+### Model diagnostics {.tabset}
+
+```{r, fig.cap="Residual independence and variance", fig.show = "hold", out.width="50%"}
+acf(resid(re_id_assignment)) 
+ggformula::gf_point(resid(re_id_assignment) ~ fitted(re_id_assignment)) +
+    labs(tag = "B") + xlab("assignment source")
+```
+
+Model diagnostics show that the residuls are independent and have a constant
+variance.
+
+### Coefficient estimates
+
+```{r}
+test_emmeans <- emmeans(re_id_assignment, pairwise~assignment_source,
+                        type = "response")
+knitr::kable(test_emmeans$emmeans)
+ggformula::gf_errorbar(data.frame(test_emmeans$emmeans),
+                       lower.CL + upper.CL ~ assignment_source)
+```
+
+The table above shows the back-transformed coefficient estimates and their
+confidence intervals. The figure shows that the confidence intervals are large,
+especially for the ISLRv2 and EDB sources. 
+
+```{r}
+knitr::kable(test_emmeans$contrasts)
+```
+
+An `emmeans` test reveals that the differences in durations between the ISLRv2
+and the Software Carpentry sources are significant (p $\le$ 0.05).
+
+## Conclusions
+
+The data and the mixed model show that the source of the assignment plays an
+important role in determining how long students take to complete the
+assignment. However the large confidence intervals for the coefficients make me
+question the relevance of this model.
+
+It also shows, to a degree, that students who take a long time are also
+likely to be students who make comments on the assignment.
+
+One of the weaknesses of this model is the lack of complete data. Not all
+the assignments done were recoreded and this has likely reduced the power of
+the model and its applicability. Accounting for differences in the way they were
+entered, there should be between 10 and 12 assignments for each student, but
+some students had only 5 records.
+
+### Session Info
+
+```{r}
+sessionInfo()
+```
+
