@@ -173,7 +173,7 @@ reported in the survey by each student.
 nonz_durations <- assignments %>% subset(duration > 0)
 nonz_durations %>%
     ggplot(aes(x = reorder(ID, duration), y = duration)) +
-    geom_boxplot() +
+    geom_violin() +
     xlab("ID") + ylab("duration (mins)") +
     theme(axis.text.y = element_text(size = 12)) +
     coord_flip() +
@@ -226,7 +226,7 @@ nonz_durations %>%
 ```{r time_assignment}
 nonz_durations %>%
     ggplot(aes(x = reorder(assignment, duration), y = duration)) +
-    geom_boxplot() +
+    geom_violin() +
     xlab("assignment") + ylab("duration (mins)") +
     theme(axis.text.y = element_text(size = 12)) +
     coord_flip() +
